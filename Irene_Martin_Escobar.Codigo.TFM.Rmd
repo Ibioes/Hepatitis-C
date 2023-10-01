@@ -1,0 +1,801 @@
+---
+title: "Hepatitis C"
+output: html_document
+date: "2023-01-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+
+# Library
+
+library(tidyverse) 
+library(htmltools)
+library(psych)
+library(kableExtra)
+library(knitr)
+library(ggplot2)
+library(plotly)
+library(stats)
+library(glmnet) 
+library(magrittr)
+library(lubridate)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(readr)
+library(readxl)
+library(xts)
+library(reshape)
+library(tidymodels)
+library(echarts4r)
+library(RColorBrewer)
+library(collapsibleTree)
+library(reactable)
+library(reactablefmtr)
+library(WRS2)
+library(car)
+library(openxlsx)
+library(epiR)
+library(bdpv)
+library(fdth)
+library(gapminder)
+library(moments)
+library(corrplot)
+library(scatterplot3d)
+library(randomForest)
+library(ROCR)
+library(purrr)
+library(smbinning)
+library(rpart)
+library(rpart.plot)
+library(h2o)
+library(faraway)
+library(e1071)
+library(fastDummies)
+library(ranger)
+library(MLmetrics)
+library(skimr)
+library(stringr)
+library(themis) 
+library(vip)
+library(probably)
+library(tidymodels)
+library(gridExtra)
+
+```
+
+Datos
+```{r}
+
+data = read.csv("~/MASTER/TFM/Irene/hepatitisC.csv")
+
+From.Basic = c("striped", "bordered", "hover", "condensed", "responsive")
+
+
+data %>% kable() %>% kable_styling(bootstrap_options = From.Basic, full_width = F, position = "center")
+
+
+```
+
+```{r}
+dim(data)
+str(data)
+data$Sex = as.factor(data$Sex)
+data$Category = as.factor(data$Category)
+str(data)
+
+map(data, ~sum(is.na(.)))
+```
+
+* Resumen
+```{r}
+summary(data)
+
+```
+
+
+* Varianza 
+```{r}
+var(data$ALB, na.rm = TRUE)
+var(data$ALP, na.rm = TRUE)
+var(data$ALT, na.rm = TRUE)
+var(data$AST, na.rm = TRUE)
+var(data$BIL, na.rm = TRUE)
+var(data$CHE, na.rm = TRUE)
+var(data$CHOL, na.rm = TRUE)
+var(data$CREA, na.rm = TRUE)
+var(data$GGT, na.rm = TRUE)
+var(data$PROT, na.rm = TRUE)
+
+# Desviacion tipica
+
+sd(data$ALB, na.rm = TRUE)
+sd(data$ALP, na.rm = TRUE)
+sd(data$ALT, na.rm = TRUE)
+sd(data$AST, na.rm = TRUE)
+sd(data$BIL, na.rm = TRUE)
+sd(data$CHE, na.rm = TRUE)
+sd(data$CHOL, na.rm = TRUE)
+sd(data$CREA, na.rm = TRUE)
+sd(data$GGT, na.rm = TRUE)
+sd(data$PROT, na.rm = TRUE)
+
+```
+
+Graficos BOXPLOT 
+```{r}
+
+
+attach(data)
+
+#ALB
+ggplot(data, aes(x = ALB, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Albúmina")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#ALP
+ggplot(data, aes(x = ALP, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Fosfatasa Alcalina")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#ALT
+ggplot(data, aes(x = ALT, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Alanina Aminotransferasa")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#AST
+ggplot(data, aes(x = AST, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Aspartato Aminotransferasa")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#BIL
+ggplot(data, aes(x = BIL, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Bilirrubina")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#CHE
+ggplot(data, aes(x = CHE, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Colinesterasa")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#CHOL
+ggplot(data, aes(x = CHOL, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Colesterol")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#CREA
+ggplot(data, aes(x = CREA, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Creatina")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#GGT
+ggplot(data, aes(x = GGT, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico del nivel de Gamma-glutamil Transferasa")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+#PROT
+ggplot(data, aes(x = PROT, y = Age, fill = Category)) + stat_boxplot(geom = "errorbar", width = 0.25) +  geom_boxplot() + guides(fill = guide_legend(title = "Gráfico de Proteína")) + scale_fill_hue(labels = c("Blood Donor", "Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")) 
+
+
+```
+
+* Medianas
+```{r}
+# Mediana ALB  
+bd_alb = median(data$ALB[data$Category=='0=Blood Donor' ], na.rm = TRUE)
+
+sbd_alb = median(data$ALB[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_alb = median(data$ALB[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_alb = median(data$ALB[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_alb =  median(data$ALB[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+
+# Mediana ALP
+
+bd_alp = median(data$ALP[data$Category=='0=Blood Donor' ], na.rm = TRUE)
+
+sbd_alp = median(data$ALP[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_alp = median(data$ALP[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_alp = median(data$ALP[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_alp =  median(data$ALP[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+
+
+# Mediana ALT
+
+bd_alt = median(data$ALT[data$Category=='0=Blood Donor'], na.rm = TRUE)
+
+sbd_alt = median(data$ALT[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_alt = median(data$ALT[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_alt = median(data$ALT[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_alt =  median(data$ALT[data$Category== '3=Cirrhosis'],  na.rm = TRUE)
+
+
+# Mediana AST
+bd_ast = median(data$AST[data$Category=='0=Blood Donor'],  na.rm = TRUE)
+
+sbd_ast = median(data$AST[data$Category== '0s=suspect Blood Donor'],  na.rm = TRUE)
+
+h_ast = median(data$AST[data$Category== '1=Hepatitis'],  na.rm = TRUE)
+
+f_ast = median(data$AST[data$Category== '2=Fibrosis'],  na.rm = TRUE)
+
+c_ast =  median(data$AST[data$Category== '3=Cirrhosis'],  na.rm = TRUE)
+
+
+
+# Mediana BIL
+
+bd_bil = median(data$BIL[data$Category=='0=Blood Donor'],  na.rm = TRUE)
+
+sbd_bil = median(data$BIL[data$Category== '0s=suspect Blood Donor'],  na.rm = TRUE)
+
+h_bil = median(data$BIL[data$Category== '1=Hepatitis'],  na.rm = TRUE)
+
+f_bil = median(data$BIL[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_bil =  median(data$BIL[data$Category== '3=Cirrhosis'], na.rm = FALSE)
+
+
+# Mediana CHE
+bd_che = median(data$CHE[data$Category=='0=Blood Donor'], na.rm = TRUE)
+
+sbd_che = median(data$CHE[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_che = median(data$CHE[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_che = median(data$CHE[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_che =  median(data$CHE[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+
+
+
+# Medina CHOL
+bd_chol = median(data$CHOL[data$Category=='0=Blood Donor'], na.rm = TRUE)
+
+sbd_chol = median(data$CHOL[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_chol = median(data$CHOL[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_chol = median(data$CHOL[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_chol =  median(data$CHOL[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+
+# Mediana CREA
+bd_crea = median(data$CREA[data$Category=='0=Blood Donor'], na.rm = TRUE)
+
+sbd_crea = median(data$CREA[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_crea = median(data$CREA[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_crea = median(data$CREA[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_crea =  median(data$CREA[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+
+# Mediana GGT
+bd_ggt = median(data$GGT[data$Category=='0=Blood Donor'], na.rm = TRUE)
+
+sbd_ggt = median(data$GGT[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_ggt = median(data$GGT[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_ggt = median(data$GGT[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_ggt =  median(data$GGT[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+
+# Mediana PROT
+bd_prot = median(data$PROT[data$Category=='0=Blood Donor'], na.rm = TRUE)
+
+sbd_prot = median(data$PROT[data$Category== '0s=suspect Blood Donor'], na.rm = TRUE)
+
+h_prot = median(data$PROT[data$Category== '1=Hepatitis'], na.rm = TRUE)
+
+f_prot = median(data$PROT[data$Category== '2=Fibrosis'], na.rm = TRUE)
+
+c_prot =  median(data$PROT[data$Category== '3=Cirrhosis'], na.rm = TRUE)
+```
+
+Tabla de medianas
+
+```{r}
+m_alb = c(bd_alb, sbd_alb, h_alb, f_alb, c_alb)
+m_alp = c(bd_alp, sbd_alp, h_alp, f_alp, c_alp)
+m_alt = c(bd_alt, sbd_alt, h_alt, f_alt, c_alt)
+m_ast = c(bd_ast, sbd_ast, h_ast, f_ast,c_ast)
+m_bil = c(bd_bil, sbd_bil, h_bil, f_bil, c_bil)
+m_che = c(bd_che, sbd_che, h_che, f_che, c_che)
+m_chol = c(bd_chol, sbd_chol, h_chol, f_chol, c_chol)
+m_crea = c(bd_crea, sbd_crea, h_crea, f_crea, c_crea)
+m_ggt = c(bd_ggt, sbd_ggt, h_ggt, f_ggt, c_ggt)
+m_prot = c(bd_prot, sbd_prot, h_prot, f_prot, c_prot)
+
+
+categoria = c("Blood Donor", " Suspect Blood Donor", "Hepatitis", "Fibrosis", "Cirrhosis")
+
+tm = data.frame(row.names = categoria, m_alb, m_alp, m_alt, m_ast, m_bil, m_che, m_chol, m_crea, m_ggt, m_prot)
+
+map(tm, ~sum(is.na(.)))
+
+tm %>% head() %>% kable() %>% kable_styling(bootstrap_options = From.Basic, full_width = F, position = "center")
+
+
+
+```
+
+
+* GGPLOTS 
+```{r}
+set.seed(123)
+#### ALB
+
+
+ggplot(data = tm, aes(x = m_alb, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#### ALP
+
+ggplot(data = tm, aes(x = m_alp, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### ALT
+ggplot(data = tm, aes(x = m_alt, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#### AST
+ggplot(data = tm, aes(x = m_ast, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### BIL
+ggplot(data = tm, aes(x = m_bil, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### CHE
+ggplot(data = tm, aes(x = m_che, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### CHOL
+ggplot(data = tm, aes(x = m_chol, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### CREA
+ggplot(data = tm, aes(x = m_crea, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### GGT
+ggplot(data = tm, aes(x = m_ggt, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#### PROT
+ggplot(data = tm, aes(x = m_prot, y = categoria , colour = categoria)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+### Histogramas
+p1 = barplot(formula = m_alb ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p2 = barplot(formula = m_alp ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p3 = barplot(formula = m_alt ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p4 = barplot(formula = m_ast ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p5 = barplot(formula = m_bil ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p6 = barplot(formula = m_che ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p7 = barplot(formula = m_chol ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p8 = barplot(formula = m_crea ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p9 = barplot(formula = m_ggt ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+p10 = barplot(formula = m_prot ~ categoria , data = tm, col = c("red", "yellow", "green", "blue", "pink"))
+
+```
+
+
+
+Anova robusto de la mediana 
+```{r}
+
+#### ALB
+pb2gen(m_alb ~ categoria, data = tm, est = "median")
+
+medpb2(m_alb ~ categoria, data = tm)
+
+med1way(m_alb ~ categoria, data = tm)
+
+summary(aov(m_alb ~ categoria, data = tm))
+
+
+#### ALP
+pb2gen(m_alp ~ categoria, data = tm, est = "median")
+
+medpb2(m_alp ~ categoria, data = tm)
+
+med1way(m_alp ~ categoria, data = tm)
+
+summary(aov(m_alp ~ categoria, data = tm))
+
+#### ALT
+pb2gen(m_alt ~ categoria, data = tm, est = "median")
+
+medpb2(m_alt ~ categoria, data = tm)
+
+med1way(m_alt ~ categoria, data = tm)
+
+summary(aov(m_alt ~ categoria, data = tm))
+
+
+#### AST
+pb2gen(m_ast ~ categoria, data = tm, est = "median")
+
+medpb2(m_ast ~ categoria, data = tm)
+
+med1way(m_ast ~ categoria, data = tm)
+
+summary(aov(m_ast ~ categoria, data = tm))
+
+
+#### BIL
+pb2gen(m_bil ~ categoria, data = tm, est = "median")
+
+medpb2(m_bil ~ categoria, data = tm)
+
+med1way(m_bil ~ categoria, data = tm)
+
+summary(aov(m_bil ~ categoria, data = tm))
+
+#### CHE
+pb2gen(m_che ~ categoria, data = tm, est = "median")
+
+medpb2(m_che ~ categoria, data = tm)
+
+med1way(m_che ~ categoria, data = tm)
+
+summary(aov(m_che ~ categoria, data = tm))
+
+
+#### CHOL
+pb2gen(m_chol ~ categoria, data = tm, est = "median")
+
+medpb2(m_chol ~ categoria, data = tm)
+
+med1way(m_chol ~ categoria, data = tm)
+
+summary(aov(m_chol ~ categoria, data = tm))
+
+
+#### CREA
+pb2gen(m_crea ~ categoria, data = tm, est = "median")
+
+medpb2(m_crea ~ categoria, data = tm)
+
+med1way(m_crea ~ categoria, data = tm)
+
+summary(aov(m_crea ~ categoria, data = tm))
+
+
+#### GGT
+pb2gen(m_ggt ~ categoria, data = tm, est = "median")
+
+medpb2(m_ggt ~ categoria, data = tm)
+
+med1way(m_ggt ~ categoria, data = tm)
+
+summary(aov(m_ggt ~ categoria, data = tm))
+
+
+#### PROT
+pb2gen(m_prot ~ categoria, data = tm, est = "median")
+
+medpb2(m_prot ~ categoria, data = tm)
+
+med1way(m_prot ~ categoria, data = tm)
+
+summary(aov(m_prot ~ categoria, data = tm))
+```
+
+COMPARAR LA RELACION DE LA ETAPA DE DESARROLLO DE LA ENFERMEDAD CON LA EDAD Y GENERO
+
+```{r}
+
+#### BOXPLOT
+attach(data)
+
+ggplot(data, aes(x = Age, y = Category, fill = Sex)) + geom_boxplot() + ggtitle("Gráfico VCH")
+
+
+
+```
+
+FRECUENCIA RELATIVAS
+
+```{r}
+#### SEXO
+table_sex = table(data$Sex)
+p_table_sex = prop.table(table_sex)
+p_table_sex
+
+
+barplot(p_table_sex, xlab='Sexo',
+        ylab='Frecuencia relativa', las=1, col = c("pink", "purple"))
+
+### EDAD
+table_edad = table(data$Age)
+p_table_edad = prop.table(table_edad)
+p_table_edad
+
+hist(p_table_edad, xlab='Edad',
+        ylab='Frecuencia relativa', las=1, col = c("royalblue"))
+
+### CATEGORIA
+table_categoria = table(data$Category)
+p_table_categoria = prop.table(table_categoria)
+p_table_categoria
+
+barplot(p_table_categoria, xlab='Categoria',
+        ylab='Frecuencia relativa', las=1, col = c("red", "lightpink", "green", "yellow", "orange"))
+
+
+
+### Histogramas de la frecuencias de las variables cuantitativas
+
+hist(ALB,col="#8EE5EE", main = "Histograma de cantidad de albúmina en la sangre")
+
+hist(ALP,col="#8EE5EE", main = "Histograma de prueba de fosfatasa alcalina")
+
+hist(ALT,col="#8EE5EE", main = "Histograma de alanina aminotransferasa")
+
+hist(AST,col="#8EE5EE", main = "Histograma de aspartato aminotransferasa")
+
+hist(BIL,col="#8EE5EE", main = "Histograma de bilirrubina")
+
+hist(CHE,col="#8EE5EE", main = "Histograma de colinesterasa")
+
+hist(CHOL,col="#8EE5EE", main = "Histograma de colesterol")
+
+hist(CREA,col="#8EE5EE", main = "Histograma de creatinina")
+
+hist(GGT,col="#8EE5EE", main = "Histograma de gamma glutamil transferasa")
+
+hist(PROT,col="#8EE5EE", main = "Histograma de proteína")
+
+```
+
+
+* Matriz de correlación
+```{r}
+attach(data)
+df_data = data.frame(Age, ALB, ALP, ALT, AST, BIL, CHE, CHOL, CREA, GGT, PROT)
+
+
+
+m_corr = cor(na.omit(df_data))
+m_corr
+
+corrplot(m_corr, method="number", type="upper")
+
+corrplot.mixed(m_corr,lower = "circle",upper = "number")
+```
+
+* Matriz de covarianza
+```{r}
+m_cov=cov(df_data) 
+m_cov
+
+
+pairs.panels(df_data, method = "spearman", ellipses = FALSE, smooth = FALSE, main = "MATRIZ DE CORRELACIÓN")
+
+```
+
+* Matriz de dispersión
+```{r}
+pairs(df_data,col=("darkblue"), main= "MATRIZ DE DISPERCIÓN")
+
+```
+
+* Puntos de nube
+```{r}
+geomPointGraph = function(data, x, y, Category, title){
+  g = ggplot(data, aes(x, y)) +
+    geom_point(aes(colour = Category)) +
+    labs(title = title) +
+    scale_fill_brewer(palette="Dark2")
+  return(g)
+}
+
+f.ALP = geomPointGraph(data, data$ALB, data$ALP, data$Category, "ALB - ALP")
+f.ALT = geomPointGraph(data, data$ALB, data$ALT, data$Category, "ALB -ALT")
+f.AST = geomPointGraph(data, data$ALB, data$AST, data$Category, "ALB - AST")
+f.BIL = geomPointGraph(data, data$ALB, data$BIL, data$Category, "ALB - BIL")
+f.CHE = geomPointGraph(data, data$ALB, data$CHE, hcvdat$Category, "ALB - CHE")
+f.CHOL = geomPointGraph(data, data$ALB, data$CHOL, data$Category, "ALB - CHOL")
+f.CREA = geomPointGraph(data, data$ALB, data$CREA, data$Category, "ALB - CREA")
+f.GGT = geomPointGraph(data, data$ALB, data$GGT, data$Category, "ALB - GGT")
+f.PROT = geomPointGraph(data, data$ALB, data$PROT, data$Category, "ALB - PROT")
+
+
+grid.arrange(f.ALP, f.ALT, f.AST, f.BIL, f.CHE, f.CHOL, f.CREA, f.GGT, f.PROT, ncol = 2)
+
+
+```
+
+* Preparacíon de los datos para realizar la predicción. 
+```{r}
+df_h = data %>% 
+  mutate(Diagnosis = if_else(str_detect(Category, "Donor"), "Donor", "Hepatitis")) %>%
+  mutate(Diagnosis = factor(Diagnosis, levels = c("Hepatitis", "Donor"))) %>%
+  relocate(Diagnosis, .before = Category) %>%
+  select(-Category)
+
+df_h
+
+```
+
+
+* Split
+
+División estratificada porque la clase objetivo está desequilibrada.
+```{r}
+set.seed(123)
+
+data_split = initial_split(df_h, prop = 3/4, strata = Diagnosis)
+
+df_train = training(data_split)
+df_test = testing(data_split)
+
+
+```
+
+Procesamiento
+
+- Imputar utilizando la mediana
+
+- Convierta las variables nominales en ficticias (no es necesario para los modelos basados en árboles o la regresión logística, pero sin este paso, el paso de sobremuestreo no funcionará)
+
+- Normalizar todos los predictores
+
+- Equilibrar las clases de destino utilizando el algoritmo SMOTE.
+
+```{r}
+my_recipe = recipe(Diagnosis ~ ., data = df_train) %>%
+  step_impute_median(all_numeric_predictors()) %>% # I use median
+  step_dummy(all_nominal_predictors()) %>% # dummy goes before normalization
+  step_normalize(all_predictors()) %>% 
+  step_smote(Diagnosis, over_ratio = 1, seed = 100) %>% # original target distribution 399 v 62
+  check_missing(all_predictors())
+
+my_recipe
+
+```
+
+- prep & bake
+```{r}
+train_data = my_recipe %>% 
+  prep(training = df_train) %>% 
+  bake(new_data = NULL) # df_train will be processed
+```
+
+- bake test
+```{r}
+test_data = my_recipe %>% 
+  prep( training = df_test) %>% 
+  bake(new_data = df_test)
+
+```
+
+- check oversampling results
+```{r}
+train_data %>% count(Diagnosis) # SMOTE was applied
+test_data %>% count(Diagnosis) # not applied
+
+```
+
+* Tabla 
+```{r}
+formato = c("striped", "bordered", "hover", "responsive")
+
+head(train_data) %>% kable() %>%
+  kable_styling(bootstrap_options = formato,
+                                    full_width = FALSE,
+                                    position = "center",
+                                    font_size = 16) %>%
+  row_spec(0, bold = T, color = "blue")
+
+```
+
+* Sintonizar y ajustar la regresión logística penalizada
+
+- Se realiza la regresión logística regularizada.
+
+- Se eliminan las variables correlacionadas (umbral de correlación = 0,75)
+
+
+```{r}
+
+# recipe for LR
+lr_recipe = recipe(Diagnosis ~ ., data = df_train) %>%
+  step_impute_median(all_numeric_predictors()) %>% # I use median
+  step_dummy(all_nominal_predictors()) %>% # dummy goes before normalization
+  step_normalize(all_predictors()) %>% 
+  step_corr(threshold = 0.75) %>%
+  step_smote(Diagnosis, over_ratio = 1, seed = 100) # original target distribution 399 v 62
+
+# set model type/engine
+lr_mod = logistic_reg(penalty = tune(), mixture = 1) %>% 
+  set_engine("glmnet")
+
+# define the workflow
+lr_workflow = 
+  workflow() %>% 
+  add_model(lr_mod) %>% 
+  add_recipe(lr_recipe)
+
+# create a tune grid
+lr_reg_grid = tibble(penalty = 10**seq(-4, 0, length.out = 30))
+
+# Stratified, repeated 10-fold cross-validation
+cv_folds = vfold_cv(df_train, strata = "Diagnosis", v = 10, repeats = 5)
+
+
+cls_metrics = metric_set(roc_auc)
+
+# train and tune the model
+lr_res = tune_grid(lr_workflow,
+              grid = lr_reg_grid,
+              resamples = cv_folds,
+              control = control_grid(save_pred = TRUE),
+              metrics = cls_metrics)
+```
+
+* Resultados
+
+```{r}
+autoplot(lr_res)
+```
+
+
+Cuanto menor sea la penalización, menor será el número de predictores utilizados por el modelo. Tales modelos deben ser preferidos.
+
+* Elección del mejor modelo
+
+Aquí puede ver los 5 mejores modelos basados en el AUC medio y clasificados por puntaje de penalización:
+```{r}
+top_models =
+  lr_res %>% 
+  show_best("roc_auc", n = 5) %>% 
+  arrange(penalty) 
+
+top_models %>% arrange(penalty)
+```
+
+
+Elegiré un modelo con el AUC medio más alto
+
+```{r}
+
+lr_best = lr_res %>% 
+  select_best(metric = "roc_auc")
+
+lr_best
+```
+
+
+* ROC-AUC del mejor modelo
+
+```{r, warning=FALSE, message=FALSE}
+lr_auc = 
+  lr_res %>% 
+  collect_predictions(parameters = lr_best) %>% 
+  roc_curve(Diagnosis, .pred_Hepatitis) %>% 
+  mutate(model = "Logistic Regression")
+
+autoplot(lr_auc)
+
+```
+
